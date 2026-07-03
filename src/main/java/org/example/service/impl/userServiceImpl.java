@@ -1,6 +1,7 @@
 package org.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.example.exception.ServiceException;
 import org.example.mapper.userMapper;
 import org.example.pojo.entity.User;
 import org.example.service.userService;
@@ -41,7 +42,7 @@ public class userServiceImpl implements userService {
     @Override
     public void register(String username, String password) {
         if (this.findUserByUsername(username) != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new ServiceException(400, "用户名已存在");
         }
         String salt = UUID.randomUUID().toString().substring(0, 6); // 生成随机盐
         String md5Pwd = MD5Util.md5WithSalt(password, salt); // 加密密码
@@ -55,26 +56,27 @@ public class userServiceImpl implements userService {
         userMapper.insert(u);
     }
 
+    // 登录
     @Override
     public String login(String username, String password) {
         User loginUser = this.findUserByUsername(username);
         // 先判断用户是否存在
-        if(loginUser == null){
-            throw  new RuntimeException("该用户不存在");
+        if (loginUser == null) {
+            throw new ServiceException(400, "该用户不存在");
         }
 
         // 如果存在，则将用户手输的密码和查询到的用户加盐字段进行加密
-        String md5Pwd = MD5Util.md5WithSalt(password,loginUser.getSalt());
+        String md5Pwd = MD5Util.md5WithSalt(password, loginUser.getSalt());
 
         // 将用户输入的密码加密后，再和查询到的用户加密密码进行比对
-        if(!md5Pwd.equals(loginUser.getPassword())){
-            throw new RuntimeException("输入的密码不正确");
+        if (!md5Pwd.equals(loginUser.getPassword())) {
+            throw new ServiceException(400, "输入的密码不正确");
         }
-        String token = JWTUtil.generateToken(Long.valueOf(loginUser.getId()),loginUser.getUsername());
+        String token = JWTUtil.generateToken(Long.valueOf(loginUser.getId()), loginUser.getUsername());
 
         // 登录成功后需要将token缓存到redis中
-        ValueOperations<String,String> operations = stringRedisTemplate.opsForValue();
-        operations.set(token,token,1, TimeUnit.HOURS);
+        ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
+        operations.set(token, token, 1, TimeUnit.HOURS);
 
         return token;
     }
@@ -86,10 +88,12 @@ public class userServiceImpl implements userService {
         return u;
     }
 
+    // 更新用户基本信息
     @Override
-    public void updateUserInfo(Integer id,String username, String nickname, String email, String phone, String userPic) {
+    public void updateUserInfo(Integer id, String username, String nickname, String email, String phone,
+            String userPic) {
         if (this.findUserByUsername(username) != null) {
-            throw new RuntimeException("用户名已存在");
+            throw new ServiceException(400, "用户名已存在");
         }
 
         User user = new User();
@@ -109,5 +113,38 @@ public class userServiceImpl implements userService {
     @Override
     public void delUser(Integer id) {
         userMapper.deleteById(id);
+    }
+
+    // 更新用户密码
+    @Override
+    public void updatePwd(String oldPwd, String newPwd, String rePwd, Integer id, String token) {
+        User user = userMapper.selectById(id);
+        if (user == null) {
+            throw new ServiceException(400, "该用户不存在");
+        }
+
+        // 先判断旧密码是否正确
+        if (!MD5Util.verifyWithSalt(oldPwd, user.getSalt(), user.getPassword())) {
+            throw new ServiceException(400, "旧密码不正确");
+        }
+
+        // 判断旧密码和新密码是否输入相同
+        if (oldPwd.equals(newPwd)) {
+            throw new ServiceException(400, "旧密码不能与新密码输入相同的值");
+        }
+
+        // 再判断两次输入的新密码是否一样
+        if (!newPwd.equals(rePwd)) {
+            throw new ServiceException(400, "两次输入的新密码不一致");
+        }
+
+        // 如果都通过以上判断，则可以修改密码了
+        String md5NewPwd = MD5Util.md5WithSalt(newPwd, user.getSalt());
+        user.setId(id);
+        user.setPassword(md5NewPwd);
+        userMapper.updateById(user);
+
+        // 修改成功后，需要把缓存到redis中的旧token删除
+        stringRedisTemplate.delete(token);
     }
 }

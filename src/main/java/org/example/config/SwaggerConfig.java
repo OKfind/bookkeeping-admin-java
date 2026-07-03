@@ -15,7 +15,7 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("API文档")
                         .version("1.0")
-                        .description("springBoot3整合Swagger3接口文档")
-                        .contact(new Contact().name("XR")));
+                        .description("Hugo记账接口文档")
+                        .contact(new Contact().name("Hugo")));
     }
 }

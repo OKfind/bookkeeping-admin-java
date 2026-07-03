@@ -20,4 +20,7 @@ public interface userService {
 
     // 逻辑删除用户
     void delUser(Integer id);
+
+    // 更新用户密码
+    void updatePwd(String oldPwd,String newPwd,String rePwd,Integer id,String token);
 }
