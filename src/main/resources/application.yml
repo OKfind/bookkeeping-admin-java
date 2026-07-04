@@ -9,7 +9,7 @@ spring:
       host: localhost
       port: 6379
 server:
-  port: 8081
+  port: 8080
 
 mybatis-plus:
   global-config:
@@ -17,3 +17,8 @@ mybatis-plus:
       logic-delete-field: deleted # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值
       logic-not-delete-value: 0  # 逻辑未删除值
+
+wechat:
+  miniapp:
+    appid: wx174d29cb0303798d  # 你的小程序 AppID
+    secret: 5451d94db82986d3e7cd6b0f6c08ac5d # 你的小程序 AppSecret

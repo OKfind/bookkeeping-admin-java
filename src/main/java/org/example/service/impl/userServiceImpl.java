@@ -38,6 +38,47 @@ public class userServiceImpl implements userService {
         return u;
     }
 
+    // 根据微信openid查询用户
+    @Override
+    public User findUserByOpenId(String openid) {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getOpenid, openid);
+        return userMapper.selectOne(wrapper);
+    }
+
+    // 注册微信用户
+    @Override
+    public void registerWxUser(String openid) {
+        User u = new User();
+        u.setUsername("wx_" + openid.substring(0, Math.min(8, openid.length())));
+        u.setOpenid(openid);
+        u.setPassword("");
+        u.setSalt("");
+        u.setCreateTime(LocalDateTime.now());
+        u.setUpdateTime(LocalDateTime.now());
+        userMapper.insert(u);
+    }
+
+    // 微信登录
+    @Override
+    public String wxLogin(String openid) {
+        // 根据openid查找用户，不存在则自动注册
+        User wxUser = this.findUserByOpenId(openid);
+        if (wxUser == null) {
+            this.registerWxUser(openid);
+            wxUser = this.findUserByOpenId(openid);
+        }
+
+        // 生成token
+        String token = JWTUtil.generateToken(Long.valueOf(wxUser.getId()), wxUser.getUsername());
+
+        // 缓存到redis
+        ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
+        operations.set(token, token, 1, TimeUnit.HOURS);
+
+        return token;
+    }
+
     // 注册用户
     @Override
     public void register(String username, String password) {

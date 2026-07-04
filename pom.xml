@@ -97,9 +97,17 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!--导入redis依赖-->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+
+    <!--导入hutool工具包，简化Http请求和json解析-->
+    <dependency>
+      <groupId>cn.hutool</groupId>
+      <artifactId>hutool-all</artifactId>
+      <version>5.8.25</version>
     </dependency>
   </dependencies>
 
