@@ -124,8 +124,15 @@ public class userServiceImpl implements userService {
 
     // 获取用户基本信息
     @Override
-    public User getUserInfo() {
-        User u = userMapper.selectOne(null);
+    public User getUserInfo(String token) {
+        Long userId = JWTUtil.getUserIdFromToken(token);
+        if (userId == null) {
+            throw new ServiceException(401, "Token无效");
+        }
+        User u = userMapper.selectById(userId);
+        if (u == null) {
+            throw new ServiceException(400, "用户不存在");
+        }
         return u;
     }
 

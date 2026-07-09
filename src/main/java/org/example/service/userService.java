@@ -22,7 +22,7 @@ public interface userService {
     String wxLogin(String openid);
 
     // 获取用户基本信息
-    User getUserInfo();
+    User getUserInfo(String token);
 
     // 编辑用户基本信息
     void updateUserInfo(Integer id, String username, String nickname, String email, String phone, String userPic);

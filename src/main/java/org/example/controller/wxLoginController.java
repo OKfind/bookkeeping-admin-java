@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.pojo.Result;
 import org.example.service.userService;
 import org.example.utils.WechatUtil;
@@ -16,6 +18,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/wx")
+@Tag(name = "微信一键登录", description = "获取微信接口返回openid")
 public class wxLoginController {
     @Autowired
     private WechatUtil wechatUtil;
@@ -24,6 +27,7 @@ public class wxLoginController {
     private userService userService;
 
     @PostMapping("/login")
+    @Operation(summary = "微信登录")
     public Result<Map<String, Object>> wxLogin(@RequestBody Map<String, String> params) {
         // 获取前端传递过来的code，然后后端请求微信提供的接口，得到openid
         String code = params.get("code");

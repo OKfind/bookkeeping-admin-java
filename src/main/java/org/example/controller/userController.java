@@ -1,5 +1,7 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.example.pojo.Result;
 import org.example.pojo.dto.User.LoginDTO;
@@ -17,11 +19,13 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/user")
+@Tag(name = "用户信息接口", description = "登录、注册、获取用户基本信息等")
 public class userController {
     @Autowired
     private userService userService;
 
     // 注册用户
+    @Operation(summary = "注册用户")
     @PostMapping("/register")
     public Result registerUser(@Valid @RequestBody LoginDTO loginDTO) {
         userService.register(loginDTO.getUsername(), loginDTO.getPassword());
@@ -29,6 +33,7 @@ public class userController {
     }
 
     // 登录
+    @Operation(summary = "用户登录")
     @PostMapping("/login")
     public Result<String> loginUser(@Valid @RequestBody LoginDTO loginDTO) {
         String token = userService.login(loginDTO.getUsername(), loginDTO.getPassword());
@@ -36,13 +41,15 @@ public class userController {
     }
 
     // 获取用户基本信息
+    @Operation(summary = "获取当前登录用户基本信息")
     @GetMapping
-    public Result<User> getUserInfo() {
-        User user = userService.getUserInfo();
+    public Result<User> getUserInfo(@RequestHeader("Authorization") String token) {
+        User user = userService.getUserInfo(token);
         return Result.success(user);
     }
 
     // 编辑用户基本信息
+    @Operation(summary = "编辑用户基本信息")
     @PutMapping
     public Result updateUserInfo(@Valid @RequestBody UpdateUserDTO updateUserDTO) {
         userService.updateUserInfo(updateUserDTO.getId(), updateUserDTO.getUsername(), updateUserDTO.getNickname(),
@@ -51,6 +58,7 @@ public class userController {
     }
 
     // 删除用户
+    @Operation(summary = "逻辑删除用户")
     @DeleteMapping
     public Result deleteUser(@RequestParam Integer id) {
         userService.delUser(id);
@@ -58,6 +66,7 @@ public class userController {
     }
 
     // 更新用户密码
+    @Operation(summary = "更新用户密码")
     @PutMapping("/updatePwd")
     public Result updatePwd(@RequestBody UpdateUserPwdDTO updateUserPwdDTO,
             @RequestHeader("Authorization") String token) {
