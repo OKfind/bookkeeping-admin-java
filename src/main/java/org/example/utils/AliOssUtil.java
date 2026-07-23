@@ -11,11 +11,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -95,6 +97,24 @@ public class AliOssUtil {
     }
 
     /**
+     * Upload a Base64 image string to a directory in OSS and return its public access URL.
+     */
+    public String uploadFile(String imageData, String directory) {
+        if (!StringUtils.hasText(imageData)) {
+            throw new IllegalArgumentException("image data must not be blank");
+        }
+
+        String trimmedImageData = imageData.trim();
+        if (trimmedImageData.startsWith("http://") || trimmedImageData.startsWith("https://")) {
+            return trimmedImageData;
+        }
+
+        ImageContent imageContent = decodeImageData(trimmedImageData);
+        String objectName = buildImageObjectName(imageContent.extension, directory);
+        return uploadFile(objectName, new ByteArrayInputStream(imageContent.bytes), imageContent.contentType);
+    }
+
+    /**
      * Delete a file from OSS.
      */
     public void deleteFile(String objectName) {
@@ -155,6 +175,81 @@ public class AliOssUtil {
         String datePath = LocalDate.now().toString().replace("-", "/");
         String prefix = StringUtils.hasText(directory) ? trimEnd(directory, "/") + "/" : "";
         return normalizeObjectName(prefix + datePath + "/" + filename);
+    }
+
+    private String buildImageObjectName(String extension, String directory) {
+        String filename = UUID.randomUUID().toString().replace("-", "") + "." + extension;
+        if (!StringUtils.hasText(directory)) {
+            return filename;
+        }
+        return normalizeObjectName(trimEnd(directory, "/") + "/" + filename);
+    }
+
+    private ImageContent decodeImageData(String imageData) {
+        String contentType = null;
+        String base64Data = imageData;
+
+        if (imageData.startsWith("data:")) {
+            int commaIndex = imageData.indexOf(",");
+            if (commaIndex < 0 || !imageData.substring(0, commaIndex).contains(";base64")) {
+                throw new IllegalArgumentException("bill image must be a Base64 image");
+            }
+
+            String mediaType = imageData.substring("data:".length(), commaIndex);
+            int semicolonIndex = mediaType.indexOf(";");
+            contentType = semicolonIndex >= 0 ? mediaType.substring(0, semicolonIndex) : mediaType;
+            base64Data = imageData.substring(commaIndex + 1);
+        }
+
+        try {
+            byte[] bytes = Base64.getDecoder().decode(base64Data.replaceAll("\\s", ""));
+            String extension = getImageExtension(contentType, bytes);
+            String resolvedContentType = StringUtils.hasText(contentType) ? contentType : "image/" + extension;
+            return new ImageContent(bytes, resolvedContentType, extension);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("bill image must be a Base64 image", e);
+        }
+    }
+
+    private String getImageExtension(String contentType, byte[] bytes) {
+        if ("image/png".equals(contentType)) {
+            return "png";
+        }
+        if ("image/gif".equals(contentType)) {
+            return "gif";
+        }
+        if ("image/webp".equals(contentType)) {
+            return "webp";
+        }
+        if ("image/jpeg".equals(contentType) || "image/jpg".equals(contentType)) {
+            return "jpg";
+        }
+        if (bytes.length >= 8
+                && bytes[0] == (byte) 0x89
+                && bytes[1] == 0x50
+                && bytes[2] == 0x4E
+                && bytes[3] == 0x47) {
+            return "png";
+        }
+        if (bytes.length >= 3
+                && bytes[0] == (byte) 0xFF
+                && bytes[1] == (byte) 0xD8
+                && bytes[2] == (byte) 0xFF) {
+            return "jpg";
+        }
+        return "jpg";
+    }
+
+    private static class ImageContent {
+        private final byte[] bytes;
+        private final String contentType;
+        private final String extension;
+
+        private ImageContent(byte[] bytes, String contentType, String extension) {
+            this.bytes = bytes;
+            this.contentType = contentType;
+            this.extension = extension;
+        }
     }
 
     private String normalizeObjectName(String objectName) {
