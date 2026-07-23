@@ -9,8 +9,15 @@ import org.example.pojo.dto.User.UpdateUserDTO;
 import org.example.pojo.dto.User.UpdateUserPwdDTO;
 import org.example.pojo.entity.User;
 import org.example.service.userService;
+import org.example.utils.AliOssUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author : XR
@@ -24,6 +31,9 @@ public class userController {
     @Autowired
     private userService userService;
 
+    @Autowired
+    private AliOssUtil aliOssUtil;
+
     // 注册用户
     @Operation(summary = "注册用户")
     @PostMapping("/register")
@@ -35,9 +45,11 @@ public class userController {
     // 登录
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public Result<String> loginUser(@Valid @RequestBody LoginDTO loginDTO) {
+    public Result<Map<String,Object>> loginUser(@Valid @RequestBody LoginDTO loginDTO) {
         String token = userService.login(loginDTO.getUsername(), loginDTO.getPassword());
-        return Result.success(token);
+        Map<String, Object> data = new HashMap<>();
+        data.put("token",token);
+        return Result.success(data);
     }
 
     // 获取用户基本信息
@@ -72,6 +84,18 @@ public class userController {
             @RequestHeader("Authorization") String token) {
         userService.updatePwd(updateUserPwdDTO.getOldPwd(), updateUserPwdDTO.getNewPwd(), updateUserPwdDTO.getRePwd(),
                 updateUserPwdDTO.getId(), token);
+        return Result.success();
+    }
+
+    // 更换用户头像
+    @PatchMapping("/updateAvatar")
+    public Result updateUserAvatar(Integer id,@RequestParam("file") MultipartFile file) throws IOException {
+        // 获取文件的名称
+        String originFileName = file.getOriginalFilename();
+        // 避免上传同一个文件导致名称一样而上传不成功的问题
+        String fileName = UUID.randomUUID()+originFileName.substring(originFileName.lastIndexOf("."));
+        String url = aliOssUtil.uploadFile(fileName,file.getInputStream());
+        userService.updateUserAvatar(id,url);
         return Result.success();
     }
 }

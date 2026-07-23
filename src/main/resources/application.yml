@@ -1,3 +1,11 @@
+aliyun:
+  oss:
+    endpoint: ${ALIYUN_OSS_ENDPOINT:oss-cn-shenzhen.aliyuncs.com}
+    access-key-id: ${ALIYUN_OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${ALIYUN_OSS_ACCESS_KEY_SECRET:}
+    bucket-name: ${ALIYUN_OSS_BUCKET_NAME:bookkeeping-by-hugo}
+    url-prefix: ${ALIYUN_OSS_URL_PREFIX:}
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -20,5 +28,5 @@ mybatis-plus:
 
 wechat:
   miniapp:
-    appid: wx174d29cb0303798d  # 你的小程序 AppID
-    secret: 5451d94db82986d3e7cd6b0f6c08ac5d # 你的小程序 AppSecret
+    appid: ${WECHAT_MINIAPP_APPID:}  # 你的小程序 AppID
+    secret: ${WECHAT_MINIAPP_SECRET:} # 你的小程序 AppSecret

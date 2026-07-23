@@ -32,4 +32,7 @@ public interface userService {
 
     // 更新用户密码
     void updatePwd(String oldPwd, String newPwd, String rePwd, Integer id, String token);
+
+    // 更换用户头像
+    void updateUserAvatar(Integer id,String userPic);
 }

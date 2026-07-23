@@ -195,4 +195,16 @@ public class userServiceImpl implements userService {
         // 修改成功后，需要把缓存到redis中的旧token删除
         stringRedisTemplate.delete(token);
     }
+
+    // 更新用户头像
+    @Override
+    public void updateUserAvatar(Integer id, String userPic) {
+        User user = userMapper.selectById(id);
+        if (user == null) {
+            throw new ServiceException(400, "该用户不存在");
+        }
+        user.setId(id);
+        user.setUserPic(userPic);
+        userMapper.updateById(user);
+    }
 }
