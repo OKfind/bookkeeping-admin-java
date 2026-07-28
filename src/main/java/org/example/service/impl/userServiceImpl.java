@@ -74,7 +74,7 @@ public class userServiceImpl implements userService {
 
         // 缓存到redis
         ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
-        operations.set(token, token, 1, TimeUnit.HOURS);
+        operations.set(token, token, 12, TimeUnit.HOURS);
 
         return token;
     }
@@ -117,7 +117,7 @@ public class userServiceImpl implements userService {
 
         // 登录成功后需要将token缓存到redis中
         ValueOperations<String, String> operations = stringRedisTemplate.opsForValue();
-        operations.set(token, token, 1, TimeUnit.HOURS);
+        operations.set(token, token, 12, TimeUnit.HOURS);
 
         return token;
     }

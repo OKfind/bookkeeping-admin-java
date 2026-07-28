@@ -1,9 +1,9 @@
 package org.example.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.github.yulichang.base.MPJBaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.example.pojo.pageMenu;
 
 @Mapper
-public interface pageMenuMapper extends BaseMapper<pageMenu> {
+public interface pageMenuMapper extends MPJBaseMapper<pageMenu> {
 }

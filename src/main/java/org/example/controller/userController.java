@@ -88,6 +88,7 @@ public class userController {
     }
 
     // 更换用户头像
+    @Operation(summary = "更换用户头像")
     @PatchMapping("/updateAvatar")
     public Result updateUserAvatar(Integer id,@RequestParam("file") MultipartFile file) throws IOException {
         // 获取文件的名称

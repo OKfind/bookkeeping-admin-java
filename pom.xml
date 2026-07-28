@@ -53,6 +53,13 @@
       <version>3.5.6</version>
     </dependency>
 
+    <!--导入MyBatis-Plus-Join连表查询增强插件，适配当前MyBatis-Plus 3.5.6版本-->
+    <dependency>
+      <groupId>com.github.yulichang</groupId>
+      <artifactId>mybatis-plus-join-boot-starter</artifactId>
+      <version>1.4.13</version>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-validation</artifactId>
@@ -132,6 +139,12 @@
       <groupId>org.glassfish.jaxb</groupId>
       <artifactId>jaxb-runtime</artifactId>
       <version>2.3.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.yulichang</groupId>
+      <artifactId>mybatis-plus-join-boot-starter</artifactId>
+      <version>1.4.13</version>
     </dependency>
   </dependencies>
 

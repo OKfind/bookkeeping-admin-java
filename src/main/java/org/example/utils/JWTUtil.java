@@ -20,8 +20,8 @@ import java.util.Map;
 public class JWTUtil {
     // 密钥（至少32个字符，满足HMAC-SHA256要求）
     private static final String SECRET = "my-bookkeeping-by-hugo-2026-secret-key!";
-    // Token 过期时间：例如 1 小时（单位：毫秒）
-    private static final long EXPIRATION = 1 * 60 * 60 * 1000L;
+    // Token 过期时间：例如 12 小时（单位：毫秒）
+    private static final long EXPIRATION = 1 * 60 * 60 * 1000L * 12;
 
     private static SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));

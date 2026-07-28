@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.pojo.Result;
 import org.example.utils.AliOssUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.util.UUID;
  * File upload API.
  */
 @RestController
+@Tag(name = "文件上传OSS")
 public class FileUploadController {
 
     @Autowired
