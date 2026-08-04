@@ -21,6 +21,9 @@ public class Category {
     @Schema(description = "账单分类名称（餐饮，打车等）")
     private String name;
 
+    @Schema(description = "账单类别（1：收入，2：支出）")
+    private Integer type;
+
     @Schema(description = "UI展示（例如 emoji 或 icon url）")
     private String icon;
 
